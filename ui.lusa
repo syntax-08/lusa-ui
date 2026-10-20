@@ -1,0 +1,113 @@
+-- ui.lusa - terminal interface kit for Lusa (TUI)
+-- Pure-string API: every function returns an ANSI string you print.
+-- Colors: classic 16 (0-7 normal, 8-15 bright).
+--
+-- install : lusalang install syntax-08/lusa-ui
+-- usage   : local ui = require("ui")
+
+local ESC = "\u{27}"
+
+-- ===== screen =====
+
+-- Clear the screen and home the cursor.
+local function clear()
+    return ESC .. "[2J" .. ESC .. "[H"
+end
+
+-- Position the cursor at column x, row y (both 1-based).
+local function position(x, y)
+    return ESC .. "[" .. y .. ";" .. x .. "H"
+end
+
+-- ===== color =====
+
+local function fg(n)
+    local code = n < 8 and (30 + n) or (90 + n - 8)
+    return ESC .. "[" .. code .. "m"
+end
+
+local function bg(n)
+    local code = n < 8 and (40 + n) or (100 + n - 8)
+    return ESC .. "[" .. code .. "m"
+end
+
+local function reset()
+    return ESC .. "[0m"
+end
+
+-- Paint text with optional fg + bg colors: ui.paint("hello", 2, 0)
+local function paint(text, fgc, bgc)
+    local s = ""
+    if fgc then s = s .. fg(fgc) end
+    if bgc then s = s .. bg(bgc) end
+    return s .. text .. reset()
+end
+
+-- ===== widgets =====
+
+-- Repeat a line character: ui.hline(30) or ui.hline(30, "=")
+local function hline(width, ch)
+    return string.rep(ch or "-", width)
+end
+
+-- Write text at (x, y) with optional fg color: ui.text(1, 5, "hello", 2)
+local function text(x, y, str, fgc)
+    local s = position(x, y)
+    if fgc then s = s .. fg(fgc) end
+    return s .. str .. reset()
+end
+
+-- Draw a single-line box frame at (x, y) with inner size w x h;
+-- an optional title is centered in the top border.
+-- Returns ONE string - print it once.
+local function box(x, y, w, h, title)
+    local t = title or ""
+    local inner = " " .. t .. " "
+    local top = "┌" .. string.rep("─", w) .. "┐"
+    if t ~= "" and #inner < w then
+        local pad = w - #inner
+        local left = pad // 2
+        top = "┌" .. string.rep("─", left) .. inner .. string.rep("─", pad - left) .. "┐"
+    end
+    local out = position(x, y) .. top
+    local row = y + 1
+    local last = y + h - 1
+    while row < last do
+        out = out .. position(x, row) .. "│" .. string.rep(" ", w) .. "│"
+        row = row + 1
+    end
+    out = out .. position(x, last) .. "└" .. string.rep("─", w) .. "┘"
+    return out
+end
+
+-- Progress bar at (x, y): ui.progress(4, 6, 30, 72)
+local function progress(x, y, width, percent)
+    local filled = (width * percent) // 100
+    if filled > width then
+        filled = width
+    end
+    return position(x, y)
+        .. fg(2) .. string.rep("█", filled)
+        .. fg(8) .. string.rep("░", width - filled)
+        .. reset()
+end
+
+-- Painted button (visual only): ui.button(4, 8, " Click ", 4)
+local function button(x, y, label, color)
+    return position(x, y) .. bg(color or 4) .. label .. reset()
+end
+
+return {
+    clear = clone clear,
+    position = clone position,
+    fg = clone fg,
+    bg = clone bg,
+    reset = clone reset,
+    paint = clone paint,
+    hline = clone hline,
+    text = clone text,
+    box = clone box,
+    progress = clone progress,
+    button = clone button,
+    version = "0.1.0",
+}

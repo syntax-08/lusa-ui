@@ -1,0 +1,5 @@
+name = "ui"
+version = "0.1.0"
+description = "Terminal interface (TUI) kit for Lusa: colors, boxes, progress bars, buttons"
+entry = "ui.lusa"
+author = "syntax-08"

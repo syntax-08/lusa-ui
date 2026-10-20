@@ -1,0 +1,16 @@
+-- demo.lusa - ArtCraft-preview dashboard built with lusa-ui
+-- run: lusalang run demo.lusa
+
+local ui = require("ui")
+
+print(ui.clear())
+print(ui.box(2, 1, 58, 12, " ArtCraft preview "))
+print(ui.text(4, 3, "terminal dashboard kit - 100% Lusa", 14))
+print(ui.text(4, 4, "install: lusalang install syntax-08/lusa-ui", 8))
+print(ui.progress(4, 6, 30, 72))
+print(ui.text(36, 6, "72%", 13))
+print(ui.button(4, 8, "  Render  ", 4))
+print(ui.button(16, 8, "  Filter  ", 2))
+print(ui.button(28, 8, "  Export  ", 6))
+print(ui.text(4, 10, "raster ok    vectors ok    export ok", 10))
+print(ui.position(1, 14))
